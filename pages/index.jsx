@@ -14,23 +14,21 @@ export default function Home() {
     urlInputRef.current && urlInputRef.current.focus();
   }, []);
 
-  useEffect(() => {
-    if (!url) {
-      setResponseData(null);
-      setError("");
-    }
-  }, [url]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     await submitForm(e);
   };
 
+  const resetAllState = () => {
+    setUrl(null);
+    setResponseData(null);
+    setLoading(false);
+    setError(null);
+  };
+
   const submitForm = async () => {
     try {
-      setResponseData(null);
-      setLoading(true);
-      setError("");
+      resetAllState();
       const headers = {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -45,17 +43,18 @@ export default function Home() {
       });
 
       const { data, success, message } = await res.json();
-      setLoading(false);
       if (!success) {
         setResponseData(null);
+        setUrl("");
         return setError(message);
       }
+
+      setLoading(false);
+      setUrl("");
       setError("");
       setResponseData(data);
     } catch (error) {
-      setResponseData(null);
-      setLoading(false);
-      setError("");
+      resetAllState();
     }
   };
 
@@ -111,7 +110,9 @@ export default function Home() {
                     <tr key={index}>
                       <td data-label="sr">{index + 1}</td>
                       <td data-label="Given URL">
-                        {result.givenURL.substring(0, 30)}...
+                        {result.givenURL.length < 30
+                          ? `${result.givenURL}`
+                          : `${result.givenURL.substring(0, 30)}...`}
                       </td>
                       <td data-label="Global Rank">{result.globalRank}</td>
                       <td data-label="Reach">{result.reach}</td>
