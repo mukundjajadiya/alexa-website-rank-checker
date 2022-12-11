@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
@@ -66,58 +67,73 @@ export default function Home() {
   };
 
   return (
-    <div id="main">
-      <h1 id="heading">Alexa Rank Checker</h1>
-      <h3>Enter url here:</h3>
-      <input
-        ref={urlInputRef}
-        type="text"
-        id="url-input"
-        onKeyDown={handleKeyDown}
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="https://mukundjajadiya.web.app"
-      />
-      <button
-        ref={submitButtonRef}
-        id="submit-button"
-        className={`${url ? "" : "disabled-button"}`}
-        onClick={handleSubmit}
-        disabled={url ? false : true}
-      >
-        {loading ? "Loading..." : "Search"}
-      </button>
-      <div id="table-div"></div>
+    <>
+      <Head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        ></meta>
+      </Head>
+      <div id="main">
+        <h1 id="heading">Alexa Rank Checker</h1>
+        <h3>Enter url here:</h3>
+        <input
+          ref={urlInputRef}
+          type="text"
+          id="url-input"
+          onKeyDown={handleKeyDown}
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://mukundjajadiya.web.app"
+        />
+        <button
+          ref={submitButtonRef}
+          id="submit-button"
+          className={`${url ? "" : "disabled-button"}`}
+          onClick={handleSubmit}
+          disabled={url ? false : true}
+        >
+          {loading ? "Loading..." : "Search"}
+        </button>
 
-      {error && <p id="error-box">{error}</p>}
+        {error && <p id="error-box">{error}</p>}
 
-      {responseData && (
-        <table>
-          <tr>
-            <th>sr</th>
-            <th>Given URL</th>
-            <th>Global Rank</th>
-            <th>Reach</th>
-            <th>Country</th>
-            <th>Country Rank</th>
-            <th>Change</th>
-          </tr>
+        <div className="table-wrapper">
+          {responseData && (
+            <table className="table">
+              <thead>
+                <th>sr</th>
+                <th>Given URL</th>
+                <th>Global Rank</th>
+                <th>Reach</th>
+                <th>Country</th>
+                <th>Country Rank</th>
+                <th>Change</th>
+              </thead>
 
-          {responseData.map((result, index) => {
-            return (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{result.result.givenURL}</td>
-                <td>{result.result.globalRank}</td>
-                <td>{result.result.reach}</td>
-                <td>{result.result.country}</td>
-                <td>{result.result.countryRank}</td>
-                <td>{result.result.change}</td>
-              </tr>
-            );
-          })}
-        </table>
-      )}
-    </div>
+              <tbody>
+                {responseData.map((result, index) => {
+                  return (
+                    <tr key={index}>
+                      <td data-label="sr">{index + 1}</td>
+                      <td data-label="Given URL">{result.result.givenURL}</td>
+                      <td data-label="Global Rank">
+                        {result.result.globalRank}
+                      </td>
+                      <td data-label="Reach">{result.result.reach}</td>
+                      <td data-label="Country">{result.result.country}</td>
+                      <td data-label="Country Rank">
+                        {result.result.countryRank}
+                      </td>
+                      <td data-label="Change">{result.result.change}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
