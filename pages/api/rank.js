@@ -1,5 +1,63 @@
 import convert from "xml-js";
 
+const getUrlRank = async (url) => {
+  try {
+    const resObj = await fetch(`https://data.alexa.com/data?cli=10&url=${url}`);
+    const xml = await resObj.text();
+    const xml2json = convert.xml2json(xml, { compact: false, spaces: 4 });
+    const data = JSON.parse(xml2json);
+
+    if (
+      data.elements[1].attributes.URL == "404" ||
+      data.elements[1]["elements"] == undefined
+    ) {
+      return {
+        givenURL: url,
+        globalRank: "Not Avalibale",
+        country: "Not Avalibale",
+        countryRank: "Not Avalibale",
+        reach: "Not Avalibale",
+        change: "Not Avalibale",
+      };
+    }
+
+    const country = data.elements[1].elements[0].elements.find((element) => {
+      return element.name == "COUNTRY";
+    });
+    const countryRank = data.elements[1].elements[0].elements.find(
+      (element) => {
+        return element.name == "COUNTRY";
+      }
+    );
+    const globalRank = data.elements[1].elements[0].elements.find((element) => {
+      return element.name == "POPULARITY";
+    });
+
+    const reach = data.elements[1].elements[0].elements.find((element) => {
+      return element.name == "REACH";
+    });
+
+    const change = data.elements[1].elements[0].elements.find((element) => {
+      return element.name == "RANK";
+    });
+
+    const givenURL = url;
+
+    const rankResult = {
+      givenURL,
+      globalRank: globalRank ? globalRank.attributes.TEXT : "Not Avalibale",
+      country: country ? country.attributes.NAME : "Not Avalibale",
+      countryRank: countryRank ? countryRank.attributes.RANK : "Not Avalibale",
+      reach: reach ? reach.attributes.RANK : "Not Avalibale",
+      change: change ? change.attributes.DELTA : "Not Avalibale",
+    };
+
+    return rankResult;
+  } catch (error) {
+    console.log("[ERROR] getUrlRank", error.message);
+  }
+};
+
 export default async function rank(req, res) {
   switch (req.method) {
     case "GET":
@@ -8,69 +66,22 @@ export default async function rank(req, res) {
 
     case "POST":
       try {
-        const { url: targetURL } = req.body;
+        const { url: targetURLs } = req.body;
 
-        const resObj = await fetch(
-          `https://data.alexa.com/data?cli=10&url=${targetURL}`
-        );
-        const xml = await resObj.text();
-        const xml2json = convert.xml2json(xml, { compact: false, spaces: 4 });
-        const data = JSON.parse(xml2json);
+        const filterTargetURLs = targetURLs
+          .split("\n")
+          .filter((url) => (url ? true : false))
+          .map((url) => url.trim());
 
-        if (
-          data.elements[1].attributes.URL == "404" ||
-          data.elements[1]["elements"] == undefined
-        ) {
-          return res.status(200).json({
-            success: false,
-            message: "Data not available.",
-          });
-        }
-        console.log("DATA", data.elements[1].elements[0].elements[2]);
-
-        const country = data.elements[1].elements[0].elements.find(
-          (element) => {
-            return element.name == "COUNTRY";
-          }
-        );
-        const countryRank = data.elements[1].elements[0].elements.find(
-          (element) => {
-            return element.name == "COUNTRY";
-          }
-        );
-        const globalRank = data.elements[1].elements[0].elements.find(
-          (element) => {
-            return element.name == "POPULARITY";
-          }
+        const rankResult = await Promise.all(
+          filterTargetURLs.map((url) => {
+            return getUrlRank(url);
+          })
         );
 
-        const reach = data.elements[1].elements[0].elements.find((element) => {
-          return element.name == "REACH";
-        });
-
-        const change = data.elements[1].elements[0].elements.find((element) => {
-          return element.name == "RANK";
-        });
-
-        const givenURL = targetURL;
-
-        const rankResult = {
-          givenURL,
-          globalRank: globalRank ? globalRank.attributes.TEXT : "Not Avalibale",
-          country: country ? country.attributes.NAME : "Not Avalibale",
-          countryRank: countryRank
-            ? countryRank.attributes.RANK
-            : "Not Avalibale",
-          reach: reach ? reach.attributes.RANK : "Not Avalibale",
-          change: change ? change.attributes.DELTA : "Not Avalibale",
-        };
-        res.setHeader(
-          "Access-Control-Allow-Origin",
-          "https://alexa-rank-checker.vercel.app"
-        );
         return res.status(200).json({
           success: true,
-          data: [{ result: rankResult }],
+          data: rankResult,
         });
       } catch (error) {
         console.log("[ERROR] ", error.message);

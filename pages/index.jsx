@@ -21,13 +21,6 @@ export default function Home() {
     }
   }, [url]);
 
-  const handleKeyDown = async (e) => {
-    if (e.key === "Enter") {
-      console.log("enter press here! ");
-      submitButtonRef.current.click();
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     await submitForm(e);
@@ -77,14 +70,13 @@ export default function Home() {
       <div id="main">
         <h1 id="heading">Alexa Rank Checker</h1>
         <h3>Enter url here:</h3>
-        <input
+        <textarea
           ref={urlInputRef}
-          type="text"
           id="url-input"
-          onKeyDown={handleKeyDown}
+          rows={5}
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://mukundjajadiya.web.app"
+          placeholder={`Enter multiple url or domain name on new line like:\n\nhttps://mukundjajadiya.web.app\nhttps:example.com`}
         />
         <button
           ref={submitButtonRef}
@@ -102,13 +94,15 @@ export default function Home() {
           {responseData && (
             <table className="table">
               <thead>
-                <th>sr</th>
-                <th>Given URL</th>
-                <th>Global Rank</th>
-                <th>Reach</th>
-                <th>Country</th>
-                <th>Country Rank</th>
-                <th>Change</th>
+                <tr>
+                  <th>sr</th>
+                  <th>Given URL</th>
+                  <th>Global Rank</th>
+                  <th>Reach</th>
+                  <th>Country</th>
+                  <th>Country Rank</th>
+                  <th>Change</th>
+                </tr>
               </thead>
 
               <tbody>
@@ -116,16 +110,14 @@ export default function Home() {
                   return (
                     <tr key={index}>
                       <td data-label="sr">{index + 1}</td>
-                      <td data-label="Given URL">{result.result.givenURL}</td>
-                      <td data-label="Global Rank">
-                        {result.result.globalRank}
+                      <td data-label="Given URL">
+                        {result.givenURL.substring(0, 30)}...
                       </td>
-                      <td data-label="Reach">{result.result.reach}</td>
-                      <td data-label="Country">{result.result.country}</td>
-                      <td data-label="Country Rank">
-                        {result.result.countryRank}
-                      </td>
-                      <td data-label="Change">{result.result.change}</td>
+                      <td data-label="Global Rank">{result.globalRank}</td>
+                      <td data-label="Reach">{result.reach}</td>
+                      <td data-label="Country">{result.country}</td>
+                      <td data-label="Country Rank">{result.countryRank}</td>
+                      <td data-label="Change">{result.change}</td>
                     </tr>
                   );
                 })}

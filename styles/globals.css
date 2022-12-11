@@ -2,7 +2,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 #main {
@@ -17,6 +16,8 @@
 }
 
 #url-input {
+  /* overflow: hidden; */
+  word-wrap: break-word;
   outline: none;
   border: 1px solid rgb(215, 215, 215);
   background-color: rgb(255, 255, 255);
@@ -71,7 +72,7 @@
 .table tbody tr:nth-child(even) {
   background-color: rgba(113, 198, 141, 0.5);
 }
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 1000px) {
   #main {
     max-width: 90%;
   }
