@@ -64,7 +64,10 @@ export default async function rank(req, res) {
           reach: reach ? reach.attributes.RANK : "Not Avalibale",
           change: change ? change.attributes.DELTA : "Not Avalibale",
         };
-
+        res.setHeader(
+          "Access-Control-Allow-Origin",
+          "https://alexa-rank-checker.vercel.app"
+        );
         return res.status(200).json({
           success: true,
           data: [{ result: rankResult }],
@@ -77,9 +80,12 @@ export default async function rank(req, res) {
           message: "Something went wrong.",
         });
       }
-      res.status(200).json({ success: true });
       break;
     default:
+      res.status(405).json({
+        success: false,
+        message: "Method not allowed.",
+      });
       break;
   }
 }
